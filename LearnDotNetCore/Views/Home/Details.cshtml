@@ -1,0 +1,23 @@
+﻿@model HomeDetailsViewModel
+@{ 
+    var fileName = Model.Employee.PhotoFileName ?? "human-avatar.png";
+    var photoPath = System.IO.Path.Combine("~/images", fileName);
+}
+<h1>The @Model.PageTitle are shown below </h1>
+<br />
+<div class="row justify-content-center m-3">
+    <div class="card m-3 img-employee">
+        <img class="card-img-top img-employee" src="@photoPath" asp-append-version="true" />
+        <div class="card-text">
+            <h3>@Model.Employee.Name</h3>
+        </div>
+        <div class="card-footer text-center">
+            <p>Email: @Model.Employee.Email</p>
+            <p>Department: @Model.Employee.Department</p>
+            <a asp-controller="Home" asp-action="Index" class="btn btn-primary">Back</a>
+            <a asp-controller="Home" asp-action="Edit" asp-route-id="@Model.Employee.Id" class="btn btn-primary">Edit</a>
+            <a asp-controller="Home" asp-action="Delete" asp-route-id="@Model.Employee.Id" class="btn btn-primary">Delete</a>
+        </div>
+
+    </div>
+</div>

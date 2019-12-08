@@ -43,7 +43,7 @@ namespace LearnDotNetCore
             }
             else
             {
-                app.UseExceptionHandler("/Error/Exception");
+                //app.UseExceptionHandler("/Error/Exception");
             }
             app.UseStatusCodePagesWithReExecute("/Error/{0}");
             app.UseRouting();

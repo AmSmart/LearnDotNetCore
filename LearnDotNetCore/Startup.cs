@@ -32,13 +32,23 @@ namespace LearnDotNetCore
                 options.UseSqlServer(_config.GetConnectionString("EmployeeDBConnection")));*/
             services.AddEntityFrameworkNpgsql().AddDbContext<AppDbContext>(options =>
             {
-                var pgUserId = Environment.GetEnvironmentVariable("POSTGRES_USER_ID");
-                var pgPassword = Environment.GetEnvironmentVariable("POSTGRES_PASSWORD");
-                var pgHost = Environment.GetEnvironmentVariable("POSTGRES_HOST");
-                var pgPort = Environment.GetEnvironmentVariable("POSTGRES_PORT");
-                var pgDatabase = Environment.GetEnvironmentVariable("POSTGRES_DB");
+                // Heroku provides PostgreSQL connection URL via env variable
+                var connUrl = Environment.GetEnvironmentVariable("DATABASE_URL");
 
-                var connStr = $"Server={pgHost};Port={pgPort};User Id={pgUserId};Password={pgPassword};Database={pgDatabase}";
+                // Parse connection URL to connection string for Npgsql
+                connUrl = connUrl.Replace("postgres://", string.Empty);
+
+                var pgUserPass = connUrl.Split("@")[0];
+                var pgHostPortDb = connUrl.Split("@")[1];
+                var pgHostPort = pgHostPortDb.Split("/")[0];
+
+                var pgDb = pgHostPortDb.Split("/")[1];
+                var pgUser = pgUserPass.Split(":")[0];
+                var pgPass = pgUserPass.Split(":")[1];
+                var pgHost = pgHostPort.Split(":")[0];
+                var pgPort = pgHostPort.Split(":")[1];
+
+                var connStr = $"Server={pgHost};Port={pgPort};User Id={pgUser};Password={pgPass};Database={pgDb}";
 
                 options.UseNpgsql(connStr);
             });

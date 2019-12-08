@@ -14,13 +14,11 @@
     <PackageReference Include="Microsoft.VisualStudio.Web.CodeGeneration.Design" Version="3.1.0" />
     <PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="3.1.0" />
   </ItemGroup>
-  
-<Target Name="PrePublishTarget" AfterTargets="Publish">
-  <Exec Command="dotnet tool install -g dotnet-ef --version 3.0.0-preview4.19216.3" />
-</Target>
 
   <Target Name="PrePublishTarget" AfterTargets="Publish">
+    <Exec Command="dotnet tool install --local dotnet-ef" />
     <Exec Command="dotnet ef database update" />
   </Target>
+
 
 </Project>

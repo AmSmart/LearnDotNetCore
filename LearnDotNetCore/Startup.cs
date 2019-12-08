@@ -28,8 +28,20 @@ namespace LearnDotNetCore
         // For more information on how to configure your application, visit https://go.microsoft.com/fwlink/?LinkID=398940
         public void ConfigureServices(IServiceCollection services)
         {
-            services.AddDbContext<AppDbContext>(options =>
-                options.UseSqlServer(_config.GetConnectionString("EmployeeDBConnection")));
+            /*services.AddDbContext<AppDbContext>(options =>
+                options.UseSqlServer(_config.GetConnectionString("EmployeeDBConnection")));*/
+            services.AddEntityFrameworkNpgsql().AddDbContext<AppDbContext>(options =>
+            {
+                var pgUserId = Environment.GetEnvironmentVariable("POSTGRES_USER_ID");
+                var pgPassword = Environment.GetEnvironmentVariable("POSTGRES_PASSWORD");
+                var pgHost = Environment.GetEnvironmentVariable("POSTGRES_HOST");
+                var pgPort = Environment.GetEnvironmentVariable("POSTGRES_PORT");
+                var pgDatabase = Environment.GetEnvironmentVariable("POSTGRES_DB");
+
+                var connStr = $"Server={pgHost};Port={pgPort};User Id={pgUserId};Password={pgPassword};Database={pgDatabase}";
+
+                options.UseNpgsql(connStr);
+            });
             services.AddMvc();
             services.AddScoped<IEmployeeRepository, SqlEmployeeRepository>();
         }
@@ -43,7 +55,7 @@ namespace LearnDotNetCore
             }
             else
             {
-                //app.UseExceptionHandler("/Error/Exception");
+                app.UseExceptionHandler("/Error/Exception");
             }
             app.UseStatusCodePagesWithReExecute("/Error/{0}");
             app.UseRouting();

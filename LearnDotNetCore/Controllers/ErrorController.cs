@@ -14,6 +14,7 @@ namespace LearnDotNetCore.Controllers
         public IActionResult Error(int statusCode)
         {
             ViewBag.Title = statusCode + " Error";
+            ViewBag.Message = "The resource you're trying to access does not exist or has been deleted";
             //Log error
             return View("Error");
         }
@@ -21,7 +22,8 @@ namespace LearnDotNetCore.Controllers
         [Route("/Error/Exception")]
         public IActionResult Exception()
         {
-            View
+            ViewBag.Title = "Oops!";
+            ViewBag.Message = "Something went wrong!\n We;ll work to fix it. Report below if problem persists";
             return View("Error");
         }
     }

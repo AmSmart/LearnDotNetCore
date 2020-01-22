@@ -6,6 +6,7 @@ using LearnDotNetCore.Models;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -17,9 +18,12 @@ namespace LearnDotNetCore
     {
         private IConfiguration _config;
 
-        public Startup(IConfiguration config)
+        private IWebHostEnvironment _env;
+
+        public Startup(IConfiguration config, IWebHostEnvironment env)
         {
             _config = config;
+            _env = env;
         }
 
 
@@ -28,38 +32,48 @@ namespace LearnDotNetCore
         // For more information on how to configure your application, visit https://go.microsoft.com/fwlink/?LinkID=398940
         public void ConfigureServices(IServiceCollection services)
         {
-            /*services.AddDbContext<AppDbContext>(options =>
-                options.UseSqlServer(_config.GetConnectionString("EmployeeDBConnection")));*/
-            services.AddEntityFrameworkNpgsql().AddDbContext<AppDbContext>(options =>
+            if (_env.IsEnvironment("Staging"))
             {
-                // Heroku provides PostgreSQL connection URL via env variable
-                var connUrl = Environment.GetEnvironmentVariable("DATABASE_URL");
+                services.AddEntityFrameworkNpgsql().AddDbContext<AppDbContext>(options =>
+                {
+                    // Heroku provides PostgreSQL connection URL via env variable
+                    var connUrl = Environment.GetEnvironmentVariable("DATABASE_URL");
 
-                // Parse connection URL to connection string for Npgsql
-                connUrl = connUrl.Replace("postgres://", string.Empty);
+                    // Parse connection URL to connection string for Npgsql
+                    connUrl = connUrl.Replace("postgres://", string.Empty);
 
-                var pgUserPass = connUrl.Split("@")[0];
-                var pgHostPortDb = connUrl.Split("@")[1];
-                var pgHostPort = pgHostPortDb.Split("/")[0];
+                    var pgUserPass = connUrl.Split("@")[0];
+                    var pgHostPortDb = connUrl.Split("@")[1];
+                    var pgHostPort = pgHostPortDb.Split("/")[0];
 
-                var pgDb = pgHostPortDb.Split("/")[1];
-                var pgUser = pgUserPass.Split(":")[0];
-                var pgPass = pgUserPass.Split(":")[1];
-                var pgHost = pgHostPort.Split(":")[0];
-                var pgPort = pgHostPort.Split(":")[1];
+                    var pgDb = pgHostPortDb.Split("/")[1];
+                    var pgUser = pgUserPass.Split(":")[0];
+                    var pgPass = pgUserPass.Split(":")[1];
+                    var pgHost = pgHostPort.Split(":")[0];
+                    var pgPort = pgHostPort.Split(":")[1];
 
-                var connStr = $"Server={pgHost};Port={pgPort};User Id={pgUser};Password={pgPass};Database={pgDb}";
+                    var connStr = $"Server={pgHost};Port={pgPort};User Id={pgUser};Password={pgPass};Database={pgDb}";
 
-                options.UseNpgsql(connStr);
-            });
+                    options.UseNpgsql(connStr);
+                });
+            }
+            else
+            {
+                services.AddDbContext<AppDbContext>(options =>
+                options.UseSqlServer(_config.GetConnectionString("EmployeeDBConnection")));
+            }
+            
+            
             services.AddMvc();
             services.AddScoped<IEmployeeRepository, SqlEmployeeRepository>();
+            services.AddIdentity<IdentityUser, IdentityRole>()
+                .AddEntityFrameworkStores<AppDbContext>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
-        public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
+        public void Configure(IApplicationBuilder app/*, IWebHostEnvironment env*/)
         {
-            if (env.IsDevelopment())
+            if (_env.IsDevelopment())
             {
                 app.UseDeveloperExceptionPage();
             }
@@ -70,7 +84,8 @@ namespace LearnDotNetCore
             app.UseStatusCodePagesWithReExecute("/Error/{0}");
             app.UseRouting();
             app.UseStaticFiles();
-
+            app.UseAuthentication();
+            app.UseAuthorization();
             app.UseEndpoints(endpoints =>
             {
                 endpoints.MapDefaultControllerRoute();

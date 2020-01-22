@@ -5,6 +5,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using LearnDotNetCore.Models;
 using LearnDotNetCore.ViewModels;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc;
 
@@ -40,6 +41,7 @@ namespace LearnDotNetCore.Controllers
         }
 
         [HttpGet]
+        [Authorize]
         public IActionResult Create()
         {
             ViewBag.Title = "New Employee";
@@ -47,6 +49,7 @@ namespace LearnDotNetCore.Controllers
         }
 
         [HttpPost]
+        [Authorize]
         public async Task<IActionResult> Create(Employee model)
         {
             ViewBag.Title = "New Employee";
@@ -59,11 +62,12 @@ namespace LearnDotNetCore.Controllers
                 _employeeRepository.AddEmployee(model);
                 return RedirectToAction("Details", new { id = model.Id });
             }
-            return View();
+            return View(model);
             
         }
 
         [HttpGet]
+        [Authorize]
         public IActionResult Edit(int id)
         {
             var employee = _employeeRepository.GetEmployee(id);
@@ -72,6 +76,7 @@ namespace LearnDotNetCore.Controllers
         }
 
         [HttpPost]
+        [Authorize]
         public async Task<IActionResult> Edit(Employee model)
         {
             if (ModelState.IsValid)
@@ -103,6 +108,13 @@ namespace LearnDotNetCore.Controllers
                 await model.Photo.CopyToAsync(fs);
             }
             model.PhotoFileName = fileName;
+        }
+
+        [HttpGet]
+        public IActionResult Delete(int id)
+        {
+            _employeeRepository.DeleteEmployee(id);
+            return RedirectToAction("Index", "Home");
         }
     }
 }

@@ -74,6 +74,7 @@ namespace LearnDotNetCore.Controllers
             if (role == null)
             {
                 ViewBag.Message = "The given role Id does not match any in the database";
+                ViewBag.Title = "Not Found";
                 return View("Error");
             }
 
@@ -82,12 +83,43 @@ namespace LearnDotNetCore.Controllers
                 RoleId = role.Id,
                 RoleName = role.Name
             };
-            foreach (var user in userManager.Users)
+            foreach (var user in userManager.Users.ToList())
             {
                 if (await userManager.IsInRoleAsync(user, role.Name))
                     model.Users.Add(user.UserName);
             }
+            ViewBag.Title = "Edit Role";
             return View(model);
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> EditRole(EditRoleViewModel model)
+        {
+            ViewBag.Title = "Edit Role";
+            var role = await roleManager.FindByIdAsync(model.RoleId);
+            if (role == null)
+            {
+                ViewBag.Message = "The given role Id does not match any in the database";
+                ViewBag.Title = "Not Found";
+                return View("Error");
+            }
+            else
+            {
+                role.Name = model.RoleName;
+                var result = await roleManager.UpdateAsync(role);
+                if (result.Succeeded)
+                {
+                    return RedirectToAction("ListRoles");
+                }
+                else
+                {
+                    foreach(var error in result.Errors)
+                    {
+                        ModelState.AddModelError("", error.Description);
+                    }
+                    return View(model);
+                }
+            }            
         }
     }
 }

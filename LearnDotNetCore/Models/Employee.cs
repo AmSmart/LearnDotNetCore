@@ -11,6 +11,8 @@ namespace LearnDotNetCore.Models
     public class Employee
     {
         public int Id { get; set; }
+        [NotMapped]
+        public string EncryptedId { get; set; }
         [Required]
         public string Name { get; set; }
         [Required]

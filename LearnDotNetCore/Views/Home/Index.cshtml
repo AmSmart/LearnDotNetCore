@@ -11,7 +11,8 @@
             </div>
             <img class="card-img-top img-employee" src="@photoPath" asp-append-version="true" />
             <div class="card-footer text-center">
-                <a asp-controller="Home" asp-action="Details" asp-route-id="@employee.Id" class="btn btn-primary">View</a>
+                <!--Details action is encrypted to demonstrate query string encryption-->
+                <a asp-controller="Home" asp-action="Details" asp-route-id="@employee.EncryptedId" class="btn btn-primary">View</a>
                 <a asp-controller="Home" asp-action="Edit" asp-route-id="@employee.Id" class="btn btn-primary">Edit</a>
                 <a asp-controller="Home" asp-action="Delete" asp-route-id="@employee.Id" class="btn btn-primary">Delete</a>
             </div>

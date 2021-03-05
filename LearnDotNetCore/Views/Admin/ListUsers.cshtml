@@ -1,0 +1,35 @@
+﻿@model List<IdentityUser>
+
+<h1>List of all users</h1>
+
+@if (Model.Any())
+{
+    foreach (var user in Model)
+    {
+        <div class="card mb-3">
+            <div class="card-header">
+                User Id: @user.Id
+            </div>
+
+            <div class="card-body">
+                <h5>@user.UserName</h5>
+            </div>
+
+            <div class="card-footer">
+                <a class="btn btn-primary" style="width:auto;" asp-action="EditUser" asp-controller="Account" asp-route-id="@user.Id">
+                    Edit
+                </a>
+                <a class="btn btn-danger" style="width:auto;" asp-action="DeleteUser" asp-controller="Account" asp-route-id="@user.Id">
+                    Delete
+                </a>
+            </div>
+        </div>
+    }
+}
+else
+{
+    <h3>There are no users currently</h3>
+    <a class="btn btn-primary" style="width:auto;" asp-action="Register" asp-controller="Account">
+        Add New User
+    </a>
+}

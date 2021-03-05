@@ -1,0 +1,35 @@
+﻿@model List<UserRoleViewModel>
+
+<h1>Edit Users In Role</h1>
+
+<form enctype="multipart/form-data" method="post">
+    <div class="card">
+        <div class="card-header">
+            <h2>Add or remove user from role</h2>
+        </div>
+
+        <div class="card-body">
+            @if (Model.Any())
+            {
+                for (int i = 0; i < Model.Count(); i++)
+                {
+                    <div class="form-check m-1">
+                        <input hidden asp-for="@Model[i].UserId" />
+                        <input hidden asp-for="@Model[i].UserName" />
+                        <input asp-for="@Model[i].IsSelected" class="form-check-input" />
+                        <label class="form-check-label">Model[i].UserName</label>
+                    </div>
+                }
+            }
+            else
+            {
+                <h3>No users in the database</h3>
+            }
+        </div>
+
+        <div class="card-footer">
+            <input type="submit" value="Update" class="btn btn-primary" style="width:auto;" />
+            <a class="btn btn-primary" asp-action="EditRole" asp-route-id="@ViewBag.RoleId" asp-controller="Admin" style="width:auto;">Cancel</a>
+        </div>
+    </div>
+</form>

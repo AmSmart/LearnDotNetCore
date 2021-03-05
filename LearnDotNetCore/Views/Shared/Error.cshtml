@@ -5,5 +5,11 @@
     <br />
     <img src="~/images/error.png" class="img-thumbnail" style="height: 200px; width: 200px;" />
     <p>@ViewBag.Message</p>
+
+    @if(ViewBag.OptionalLink != null && ViewBag.OptionalLink != "")
+    {
+        <a href="@ViewBag.OptionalLink" style="width:auto" class="btn btn-primary">@ViewBag.OptionalLinkName</a>
+    }
+
     <a class="btn btn-primary btn-success" style="width: auto;" asp-controller="Home" asp-action="Index">Click to go to the Home Page</a>
 </div>

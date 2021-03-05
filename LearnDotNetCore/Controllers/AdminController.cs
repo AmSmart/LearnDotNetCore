@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using LearnDotNetCore.ViewModels;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 
@@ -10,6 +11,7 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace LearnDotNetCore.Controllers
 {
+    [Authorize(Roles = "Administrator")]
     public class AdminController : Controller
     {
         private readonly RoleManager<IdentityRole> roleManager;
@@ -120,6 +122,74 @@ namespace LearnDotNetCore.Controllers
                     return View(model);
                 }
             }            
+        }
+
+        [HttpGet]
+        public async Task<IActionResult> EditUsersInRole(string roleId)
+        {
+            ViewBag.Title = "Edit Users in Role";
+            var role = await roleManager.FindByIdAsync(roleId);
+            ViewBag.RoleId = roleId;
+            if(role == null)
+            {
+                ViewBag.Message = "The queried role does not exist";
+                return View("Error");
+            }
+            var model = new List<UserRoleViewModel>();
+
+            foreach(var user in userManager.Users.ToList())
+            {
+                var userInRole = new UserRoleViewModel()
+                {
+                    UserId = user.Id,
+                    UserName = user.UserName
+                };
+
+                if(await userManager.IsInRoleAsync(user, role.Name))
+                {
+                    userInRole.IsSelected = true;
+                }
+                else
+                {
+                    userInRole.IsSelected = false;
+                }
+                model.Add(userInRole);
+            }
+            return View(model);
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> EditUsersInRole(List<UserRoleViewModel> model, string roleId)
+        {
+            var role = await roleManager.FindByIdAsync(roleId);
+            if (role == null)
+            {
+                ViewBag.Title = "Not Found";
+                ViewBag.Message = "The queried role does not exist";
+                return View("Error");
+            }
+
+            foreach (var userRoleVM in model)
+            {
+                var user = await userManager.FindByIdAsync(userRoleVM.UserId);    
+                if(!await userManager.IsInRoleAsync(user,role.Name) && userRoleVM.IsSelected)
+                {
+                    await userManager.AddToRoleAsync(user, role.Name);
+                }
+                else if(await userManager.IsInRoleAsync(user,role.Name) && !userRoleVM.IsSelected)
+                {
+                    await userManager.RemoveFromRoleAsync(user, role.Name);
+                }
+            }
+            return RedirectToAction("EditRole", new { id = roleId });
+        }
+
+        [HttpGet]
+        public IActionResult ListUsers()
+        {
+            ViewBag.Title = "List All Users";
+            var model = userManager.Users.ToList();
+            return View(model);
         }
     }
 }

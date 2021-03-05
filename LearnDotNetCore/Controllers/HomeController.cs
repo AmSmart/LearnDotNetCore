@@ -8,6 +8,8 @@ using LearnDotNetCore.ViewModels;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc;
+using LearnDotNetCore.Security;
+using Microsoft.AspNetCore.DataProtection;
 
 namespace LearnDotNetCore.Controllers
 {
@@ -15,28 +17,45 @@ namespace LearnDotNetCore.Controllers
     {
         private IEmployeeRepository _employeeRepository;
         private readonly IWebHostEnvironment hostEnvironment;
+        private readonly IDataProtector dataProtector;
 
-        public HomeController(IEmployeeRepository employeeRepository, IWebHostEnvironment hostEnvironment)
+        public HomeController(IEmployeeRepository employeeRepository, IWebHostEnvironment hostEnvironment,
+            IDataProtectionProvider protectionProvider, DataProtectionPurposeStrings purposeStrings)
         {
             _employeeRepository = employeeRepository;
             this.hostEnvironment = hostEnvironment;
+            dataProtector = protectionProvider.CreateProtector(purposeStrings.EmployeeIdRouteValue);
         }
 
         public ViewResult Index()
         {
-            var employeeList = _employeeRepository.GetAllEmployees();
+            var employeeList = _employeeRepository.GetAllEmployees()
+                .Select(x => 
+                {
+                    x.EncryptedId = dataProtector.Protect(x.Id.ToString());
+                    return x;
+                });
             ViewBag.Title = "All Employees";
             return View(employeeList);
         }
 
-        public ViewResult Details(int? id)
+        public ViewResult Details(string id)
         {
+            string decryptedId = dataProtector.Unprotect(id);
+            Employee employee = _employeeRepository.GetEmployee(Convert.ToInt32(decryptedId));
+            if(employee == null)
+            {
+                //Error view is used to display an error here
+                ViewBag.Title = "Error";
+                ViewBag.Message = "Emplyee Not found";
+                return View("Error");
+            }
             var vm = new HomeDetailsViewModel() 
             {
-                Employee = _employeeRepository.GetEmployee(id??1),
+                Employee = employee,
                 PageTitle = "Employee Details"
             };
-            ViewBag.Title = "Employee 1";
+            ViewBag.Title = $"Employee {decryptedId}";
             return View(vm);
         }
 

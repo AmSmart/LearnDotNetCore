@@ -28,16 +28,42 @@
     <div>
         <nav class="navbar navbar-expand-sm bg-dark navbar-dark">
             <a class="navbar-brand"><img style="max-height: 30px; max-width: 30px;" src="~/images/human-avatar.png" /></a>
-            <button type="button" class="navbar-toggler dropdown-menu-right" data-toggle="collapse" data-target="#collapsingNavbar">
+            <button type="button" class="navbar-toggler dropdown-menu-right"
+                    data-toggle="collapse" data-target="#collapsingNavbar">
                 <span class="navbar-toggler-icon"></span>
             </button>
-            <div class="collapse navbar-collapse" id="collapsingNavbar">
-                <ul class="navbar-nav">
-                    <li class="nav-item m-1"><a asp-controller="Home" asp-action="Index">List All</a></li>
-                    <li class="nav-item m-1"><a asp-controller="Home" asp-action="Create">Create New</a></li>
-                    @if (signInManager.IsSignedIn(User))
-                    {
-                        <li class="nav-item">
+            @if (signInManager.IsSignedIn(User))
+            {
+                <div class="collapse navbar-collapse" id="collapsingNavbar">
+                    <ul class="navbar-nav">
+                        <li class="nav-item m-1"><a asp-controller="Home" asp-action="Index">List All</a></li>
+                        <li class="nav-item m-1"><a asp-controller="Home" asp-action="Create">Create New</a></li>
+                        @if (User.IsInRole("Administrator"))
+                        {
+                            <li class="nav-item m-1 dropdown">
+                                <a class="dropdown-toggle" id="navbarDropdownMenuLink" href="#"
+                                   data-toggle="dropdown" aria-haspopup="false" aria-expanded="false">
+                                    Manage
+                                </a>
+
+                                <div class="dropdown-menu" aria-labelledby="navbarDropdownMenuLink">
+                                    <a class="dropdown-item" asp-action="ListRoles" asp-controller="Admin">
+                                        Roles
+                                    </a>
+                                    <a class="dropdown-item" asp-action="ListUsers" asp-controller="Admin">
+                                        Users
+                                    </a>
+                                </div>
+
+                            </li>
+                        }
+                    </ul>
+
+                    <ul class="navbar-nav ml-auto">
+                        <li class="nav-item m-1">
+                            <a asp-action="ChangePassword" asp-controller="Account">Manage Password</a>
+                        </li>
+                        <li class="nav-item m-1">
                             <form method="post" asp-action="Logout" asp-controller="Account">
                                 <button type="submit" class="btn btn-link nav-link py-0"
                                         style="width: auto;">
@@ -45,14 +71,25 @@
                                 </button>
                             </form>
                         </li>
-                    }
-                    else
-                    {
+                    </ul>
+
+                </div>
+            }
+            else
+            {
+                <div class="collapse navbar-collapse" id="collapsingNavbar">
+                    <ul class="navbar-nav">
+                        <li class="nav-item m-1"><a asp-controller="Home" asp-action="Index">List All</a></li>
+                        <li class="nav-item m-1"><a asp-controller="Home" asp-action="Create">Create New</a></li>
+                    </ul>
+
+                    <ul class="navbar-nav ml-auto">
                         <li class="nav-item m-1"><a asp-controller="Account" asp-action="Register">Register</a></li>
                         <li class="nav-item m-1"><a asp-controller="Account" asp-action="Login">Login</a></li>
-                    }
-                </ul>
-            </div>>
+                    </ul>
+                </div>
+            }
+
         </nav>
         <div style="padding: 25px;">
             @RenderBody()
